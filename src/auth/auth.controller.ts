@@ -3,17 +3,18 @@ import { AuthService } from './providers/auth.service';
 import { SignUpDto } from './dto/sign-up.dto';
 import { LoginDto } from './dto/login.dto';
 import { ApiResponseMessage } from '../common/decorators/api-response-message';
-import { API_RESPONSE_MESSAGES } from '../common/constants/api.constant';
-import { ConfigService } from '@nestjs/config';
+import { API_RESPONSE_MESSAGES } from '../common/constants/api-success-message.constant';
+import { Public } from './decorators/public.decorator';
 
+@Public()
 @Controller('auth')
 export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly configService : ConfigService
+    // private readonly configService : ConfigService
   ){
-    console.log(this.configService.get('appConfig.port'));
+    // console.log(this.configService.get('appConfig.port'));
   }
 
   // constructor(
@@ -35,7 +36,7 @@ export class AuthController {
   @Post('login')
   @ApiResponseMessage(API_RESPONSE_MESSAGES.AUTH.LOGIN)
   public login(@Body() loginDto : LoginDto){
-    return loginDto;
+    return this.authService.login(loginDto);
   }
 
 }

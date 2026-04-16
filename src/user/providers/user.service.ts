@@ -30,4 +30,8 @@ export class UserService {
     });
   }
 
+  public async findByEmail(email : string) : Promise<UserDocument | null >{
+    return this.usersModel.findOne({email}).select('+password')
+  }
+
 }

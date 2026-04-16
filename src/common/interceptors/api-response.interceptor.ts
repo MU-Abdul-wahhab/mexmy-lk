@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Observable, pipe , map } from 'rxjs';
 import { Reflector } from '@nestjs/core';
-import { RESPONSE_MESSAGE_KEY } from '../constants/api.constant';
+import { RESPONSE_MESSAGE_KEY } from '../constants/api-success-message.constant';
 
 @Injectable()
 export class ApiResponseInterceptor implements NestInterceptor {
@@ -12,7 +12,7 @@ export class ApiResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
 
     const startTime : number = Date.now();
-    const requestedTime : string = new Date().toDateString();
+    const requestedTime: string = new Date().toISOString();
 
     const message = this.reflector.get<string>(RESPONSE_MESSAGE_KEY , context.getHandler())
     ?? 'Success';

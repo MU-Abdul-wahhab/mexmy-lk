@@ -1,19 +1,23 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { UserService } from '../../user/providers/user.service';
 import { SignUpDto } from '../dto/sign-up.dto';
 import { HashingProvider } from './hashing.provider';
 import { TokenProvider } from './token.provider';
 import { MailService } from '../../mail/providers/mail.service';
 import { EmailProducer } from '../../mail/providers/email.producer';
+import { LoginDto } from '../dto/login.dto';
+import { API_ERROR_MESSAGE } from '../../common/constants/api-error-message.constant';
+import { JwtTokenProvider } from './jwt-token.provider';
 
 @Injectable()
 export class AuthService {
 
   constructor(
-    private userService: UserService,
-    private hashingProvider: HashingProvider,
-    private tokenProvider: TokenProvider,
-    private readonly emailProducer : EmailProducer
+    private readonly userService: UserService,
+    private readonly hashingProvider: HashingProvider,
+    private readonly tokenProvider: TokenProvider,
+    private readonly emailProducer : EmailProducer,
+    private readonly jwtTokenProvider: JwtTokenProvider,
   ) {}
 
   public async signUp(signUpDto : SignUpDto) {
@@ -22,7 +26,7 @@ export class AuthService {
 
     if(isExist){
       const field = isExist.email === signUpDto.email ? 'Email' : 'Mobile'
-      throw new ConflictException(`${field} already exists`);
+      throw new ConflictException(API_ERROR_MESSAGE.auth.alreadyExist(field));
     }
 
     const token :number = this.tokenProvider.generateToken();
@@ -49,6 +53,31 @@ export class AuthService {
    }
 
     return user;
+  }
+
+  public async login(loginDto : LoginDto){
+
+    const user = await this.userService.findByEmail(loginDto.email)
+
+    if(!user || !user.password){
+      throw new BadRequestException(API_ERROR_MESSAGE.auth.invalidCredentials)
+    }
+
+    const isPasswordCorrect = await this.hashingProvider.verifyPassword(loginDto.password , user.password);
+
+    if(!isPasswordCorrect) throw new BadRequestException(API_ERROR_MESSAGE.auth.invalidCredentials)
+
+    const accessToken = await this.jwtTokenProvider.generateAccessToken({_id: user._id , email : user.email});
+    const refreshToken = await this.jwtTokenProvider.generateRefreshToken(user._id)
+
+    const userResponse = user.toObject() as Record<string, any>;
+    delete userResponse.password;
+    delete userResponse.passwordChangedAt;
+    delete userResponse.token;
+    delete userResponse.tokenTime;
+
+    return { accessToken, refreshToken, user: userResponse };
+
   }
 
 }

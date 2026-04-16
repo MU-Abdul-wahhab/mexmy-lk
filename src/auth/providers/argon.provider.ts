@@ -10,7 +10,7 @@ export class ArgonProvider implements HashingProvider{
   }
 
   async verifyPassword(password: string , encryptedPassword : string): Promise<boolean> {
-    return await argon2.verify(password , encryptedPassword)
+    return await argon2.verify(encryptedPassword ,password )
   }
 
 }

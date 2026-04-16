@@ -12,6 +12,9 @@ import databaseConfig from './common/config/database.config';
 import mailConfig from './mail/config/mail.config';
 import { BullModule } from '@nestjs/bullmq';
 import redisConfig from './common/config/redis.config';
+import { JwtStrategy } from './auth/providers/jwt-strategy.provider';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guards/jwt-auth-guard.service';
 
 
 const ENV = process.env.NODE_ENV ?? 'development';
