@@ -13,7 +13,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly configService : ConfigService
   ){
-    // console.log(this.configService.get('appConfig.port'));
+    console.log(this.configService.get('appConfig.port'));
   }
 
   // constructor(
